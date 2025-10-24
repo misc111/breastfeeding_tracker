@@ -1,6 +1,6 @@
 self.addEventListener('install', e => {
     e.waitUntil(
-        caches.open('time-v1').then(cache => cache.addAll([
+        caches.open('feed-tracker-v1').then(cache => cache.addAll([
             './',
             './index.html'
         ]))
