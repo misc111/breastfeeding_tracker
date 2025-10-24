@@ -1,5 +1,10 @@
 #!/usr/bin/env node
 
+import { FeedingSide } from './src/utils/constants.js';
+import { addFeedLogic } from './src/utils/feedLogic.js';
+import { formatTimerDisplay } from './src/utils/timeFormatting.js';
+import { calculateDailyStats } from './src/utils/statistics.js';
+
 // Test Framework
 const results = {
     total: 0,
@@ -62,74 +67,6 @@ function expect(actual) {
             }
         }
     };
-}
-
-// Core Logic Functions (extracted from main app for testing)
-const FeedingSide = {
-    Left: 'Left',
-    Right: 'Right'
-};
-
-function addFeedLogic(history, newSingleFeed) {
-    const newHistory = [...history];
-
-    if (newHistory.length > 0) {
-        const lastUnit = newHistory[0];
-        const timeDiff = newSingleFeed.endTime - lastUnit.endTime;
-        const tenMinutes = 10 * 60 * 1000;
-
-        if (lastUnit.sessions.length === 1 &&
-            lastUnit.sessions[0].side !== newSingleFeed.side &&
-            timeDiff < tenMinutes) {
-            // Add to existing unit
-            lastUnit.sessions.push(newSingleFeed);
-            lastUnit.endTime = newSingleFeed.endTime;
-            return newHistory;
-        }
-    }
-
-    // Create new unit
-    const newUnit = {
-        id: `${Date.now()}-${Math.random()}`,
-        sessions: [newSingleFeed],
-        endTime: newSingleFeed.endTime
-    };
-    return [newUnit, ...newHistory];
-}
-
-function formatTimerDisplay(seconds) {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-
-    if (hours > 0) {
-        return `${hours}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-    }
-    return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-}
-
-function calculateDailyStats(history, targetDate) {
-    const today = new Date(targetDate);
-    today.setHours(0, 0, 0, 0);
-
-    const todayFeeds = history.filter(unit => {
-        const feedDate = new Date(unit.endTime);
-        feedDate.setHours(0, 0, 0, 0);
-        return feedDate.getTime() === today.getTime();
-    });
-
-    const totalFeeds = todayFeeds.length;
-    const totalTime = todayFeeds.reduce((sum, unit) => {
-        return sum + unit.sessions.reduce((s, session) => s + session.duration, 0);
-    }, 0);
-    const leftTime = todayFeeds.reduce((sum, unit) => {
-        return sum + unit.sessions.filter(s => s.side === FeedingSide.Left).reduce((s, session) => s + session.duration, 0);
-    }, 0);
-    const rightTime = todayFeeds.reduce((sum, unit) => {
-        return sum + unit.sessions.filter(s => s.side === FeedingSide.Right).reduce((s, session) => s + session.duration, 0);
-    }, 0);
-
-    return { totalFeeds, totalTime, leftTime, rightTime };
 }
 
 // TESTS
