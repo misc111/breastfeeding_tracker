@@ -1,8 +1,8 @@
 self.addEventListener('install', e => {
     e.waitUntil(
         caches.open('time-v1').then(cache => cache.addAll([
-            '/',
-            '/index.html'
+            '/breastfeeding_tracker/',
+            '/breastfeeding_tracker/index.html'
         ]))
     );
 });
