@@ -201,10 +201,15 @@
                                     const endTime = new Date(unit.endTime);
                                     const isPending = unit.sessions.length === 1;
 
+                                    const formatTime = (date) => {
+                                        return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                                    };
+
                                     let timeSinceLastFeed = '';
-                                    if (idx < units.length - 1) {
-                                        const prevUnit = units[idx + 1];
-                                        const diffMs = startTime - prevUnit.endTime;
+                                    if (idx > 0) {
+                                        const prevUnit = units[idx - 1];
+                                        const prevEndTime = new Date(prevUnit.endTime);
+                                        const diffMs = startTime - prevEndTime;
                                         const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
                                         const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
                                         timeSinceLastFeed = `(${diffHours}h ${diffMins}m)`;
@@ -213,8 +218,9 @@
                                     return (
                                         <div key={unit.id} className="border-l-4 border-violet-400 pl-3">
                                             <div className="text-sm text-slate-600">
-                                                {startTime.toLocaleTimeString()} - {endTime.toLocaleTimeString()}
-                                                {isPending && <span className="ml-2 text-rose-500">Pending...</span>}
+                                                {formatTime(startTime)}
+                                                {!isPending && <> - {formatTime(endTime)}</>}
+                                                {isPending && <span className="ml-2 text-rose-500">- Pending...</span>}
                                                 {timeSinceLastFeed && <span className="ml-2 text-slate-400">{timeSinceLastFeed}</span>}
                                             </div>
                                             <div className="flex gap-2 mt-2">
@@ -262,20 +268,22 @@
                         )}
                     </div>
 
-                    {/* History Log */}
+                    {/* History Header - Static */}
+                    {chronologicalHistory.length > 0 && (
+                        <div className="px-4 flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-bold text-slate-800">Feeding History</h2>
+                            <button
+                                onClick={clearHistory}
+                                disabled={activeSide !== null}
+                                className="px-4 py-2 bg-red-500 text-white rounded-lg disabled:bg-slate-300 disabled:cursor-not-allowed"
+                            >
+                                Clear
+                            </button>
+                        </div>
+                    )}
+
+                    {/* History Log - Scrollable */}
                     <div className="flex-grow overflow-y-auto px-4 pb-4">
-                        {chronologicalHistory.length > 0 && (
-                            <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-xl font-bold text-slate-800">Feeding History</h2>
-                                <button
-                                    onClick={clearHistory}
-                                    disabled={activeSide !== null}
-                                    className="px-4 py-2 bg-red-500 text-white rounded-lg disabled:bg-slate-300 disabled:cursor-not-allowed"
-                                >
-                                    Clear
-                                </button>
-                            </div>
-                        )}
                         <HistoryLog chronologicalHistory={chronologicalHistory} />
                     </div>
 
