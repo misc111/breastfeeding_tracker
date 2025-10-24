@@ -1,7 +1,7 @@
 {
   "name": "Time",
   "short_name": "Time",
-  "start_url": "/breastfeeding_tracker/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
